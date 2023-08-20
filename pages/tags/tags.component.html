@@ -1,0 +1,22 @@
+<wselect
+	(modelChange)="setGroup($event)"
+	[select]="group"
+	[items]="groups"
+	placeholder="Select specific group"
+></wselect>
+
+<wselect
+	*ngIf="category"
+	(modelChange)="category = $event"
+	[select]="category"
+	[items]="categories"
+	placeholder="Select specific category"
+></wselect>
+
+<wtable
+	*ngIf="category"
+	title="Product Tags"
+	[columns]="columns"
+	[config]="config"
+	[rows]="rows"
+></wtable>
