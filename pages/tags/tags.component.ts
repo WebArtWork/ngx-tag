@@ -122,9 +122,5 @@ export class TagsComponent {
 		private _form: FormService,
 		private _core: CoreService,
 		private _ts: TagService
-	) {
-		this._mongo.on('category', ()=>{
-			this.category = this.categories[0]._id;
-		});
-	}
+	) {}
 }
