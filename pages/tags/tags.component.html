@@ -1,11 +1,4 @@
 <wselect
-	(modelChange)="setGroup($event)"
-	[select]="group"
-	[items]="groups"
-	placeholder="Select specific group"
-></wselect>
-
-<wselect
 	*ngIf="category"
 	(modelChange)="category = $event"
 	[select]="category"

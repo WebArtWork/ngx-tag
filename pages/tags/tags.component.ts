@@ -13,25 +13,6 @@ import { Tag, TagService } from '../../services/tag.service';
 export class TagsComponent {
 	columns = ['name', 'description'];
 
-	groups = this._cs.groups.map(m => {
-		return {
-			name: m,
-			_id: m
-		}
-	});
-
-	group = this.groups[0]._id;
-
-	setGroup(group: string) {
-		this.group = group;
-		this.category = '';
-		setTimeout(() => {// TODO: make wselect to work with items change
-			this.category = this.categories.length ? this.categories[0]._id : '';
-		}, 1);
-	}
-
-	category: string;
-
 	form: FormInterface = this._form.getForm('tag', {
 		components: [
 			{
@@ -111,16 +92,22 @@ export class TagsComponent {
 	}
 
 	get categories(): Category[] {
-		return this._cs.group(this.group);
+		return this._cs.categories;
 	}
+
+	category: string;
 
 	constructor(
 		private _translate: TranslateService,
 		private _alert: AlertService,
 		private _cs: CategoryService,
-		private _mongo: MongoService,
 		private _form: FormService,
+		private _mongo: MongoService,
 		private _core: CoreService,
 		private _ts: TagService
-	) {}
+	) {
+		this._mongo.on('category', ()=>{
+			this.category = this.categories[0]._id;
+		});
+	}
 }
