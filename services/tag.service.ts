@@ -1,81 +1,39 @@
 import { Injectable } from '@angular/core';
-import { environment } from '@environment/environment';
 import { MongoService, AlertService } from 'wacom';
-import { CategoryService } from './category.service';
 
 export interface Tag {
 	_id: string;
-	module: string;
-	category: string;
+	enabled: boolean;
+	parent: string;
 	name: string;
 	description: string;
+	stores: string[];
 }
 
 @Injectable({
 	providedIn: 'root'
 })
 export class TagService {
-	groups = (environment as unknown as { groups: string[] }).groups || ['product'];
-
-	product_categories = [
-		{ _id: "Одяг", name: "Одяг" },
-		{ _id: "Взуття", name: "Взуття" },
-		{ _id: "Аксесуари", name: "Аксесуари" },
-		{ _id: "Сумки", name: "Сумки" },
-		{ _id: "Косметика", name: "Косметика" },
-		{ _id: "Техніка", name: "Техніка" },
-		{ _id: "Тканини", name: "Тканини" }
-	];
-
 	tags: Tag[] = [];
-
+	rootTags: Tag[] = [];
+	childrenTags: Record<string, Tag[]> = {};
 	_tags: Record<string, unknown> = {};
-
 	new(): Tag {
 		return {} as Tag;
 	}
 
-	group(group: string): Tag[] {
-		const tags: Tag[] = [];
-
-		this.mongo.on('category tag', ()=>{
-			const categoryIds = this._cs.group(group).map(c=>c._id);
-
-			for (const categoryId of categoryIds) {
-				for (const tag of (this._tags['category'] as Record<string, Tag[]>)[categoryId] || []) {
-					tags.push(tag);
-				}
-
-			}
-		});
-
-		return tags;
-	}
-
-	category(category: string): Tag[] {
-		if (this._tags['category']) {
-			return (this._tags['category'] as Record<string, Tag[]>)[category];
-		} else {
-			const tags: Tag[] = [];
-
-			this.mongo.on('tag', ()=>{
-				for (const tag of (this._tags['category'] as Record<string, Tag[]>)[category] || []) {
-					tags.push(tag);
-				}
-			});
-
-			return tags;
-		}
-	}
-
 	constructor(
-		private _cs: CategoryService,
 		private mongo: MongoService,
 		private alert: AlertService
 	) {
 		this.tags = mongo.get('tag', {
-			groups: 'category'
+			groups: 'parent',
+			query: {
+				rootTags: (tag: Tag) => !tag.parent
+			}
 		}, (tags: Tag[], obj: Record<string, unknown>) => {
+			this.rootTags = obj['rootTags'] as Tag[];
+			this.childrenTags = obj['parent'] as Record<string, Tag[]>;
 			this._tags = obj;
 		});
 	}
@@ -108,7 +66,7 @@ export class TagService {
 
 	update(
 		tag: Tag,
-		callback = (created: Tag) => {},
+		callback = () => {},
 		text = 'tag has been updated.'
 	): void {
 		this.mongo.afterWhile(tag, ()=> {
@@ -118,21 +76,27 @@ export class TagService {
 
 	save(
 		tag: Tag,
-		callback = (created: Tag) => {},
+		callback = () => {},
 		text = 'tag has been updated.'
 	): void {
 		this.mongo.update('tag', tag, () => {
-			if(text) this.alert.show({ text, unique: tag });
+			if (text) this.alert.show({ text, unique: tag });
+			if (typeof callback === 'function') {
+				callback();
+			}
 		});
 	}
 
 	delete(
 		tag: Tag,
-		callback = (created: Tag) => {},
+		callback = () => {},
 		text = 'tag has been deleted.'
 	): void {
 		this.mongo.delete('tag', tag, () => {
-			if(text) this.alert.show({ text });
+			if (text) this.alert.show({ text });
+			if (typeof callback === 'function') {
+				callback();
+			}
 		});
 	}
 }

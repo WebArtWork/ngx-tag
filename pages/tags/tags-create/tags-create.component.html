@@ -1,0 +1,8 @@
+<h1>Create Tags</h1>
+<winput
+	placeholder="Privde array of tags"
+	(wChange)="entities = $event"
+></winput>
+<wbutton (click)="create(); close()">Create</wbutton>
+<div>Drop next text to chatGPT to inform him what data he should create. After that you can inform him what you need to be created</div>
+<pre>{{chatGPT}}</pre>
