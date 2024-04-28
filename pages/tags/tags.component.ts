@@ -13,8 +13,7 @@ import { Tag, TagService } from '../../services/tag.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TagsCreateComponent } from './tags-create/tags-create.component';
 import { UserService } from 'src/app/core';
-import { Store } from 'src/app/core/services/store.service';
-import { StoreService } from 'src/app/modules/store/services/store.service';
+import { Store, StoreService } from '../../../store/services/store.service';
 
 @Component({
 	templateUrl: './tags.component.html',
@@ -110,7 +109,7 @@ export class TagsComponent {
 					this._ts.create(created as Tag, this.setTags.bind(this));
 					close();
 				}
-			});
+			}, this.store ? { stores: [this.store]} : {});
 		},
 		update: (doc: Tag) => {
 			this._form.modal<Tag>(this.form, [], doc).then((updated: Tag) => {
