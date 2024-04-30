@@ -197,7 +197,10 @@ export class TagsComponent {
 					this.tags.push(tag);
 				}
 			} else {
-				if (tag.stores.includes(this.store)) {
+				if (
+					tag.stores.includes(this.store) &&
+					!tag.parent
+				) {
 					this.tags.push(tag);
 				}
 			}
