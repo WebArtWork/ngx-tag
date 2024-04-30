@@ -6,6 +6,7 @@ export interface Tag {
 	enabled: boolean;
 	parent: string;
 	name: string;
+	order: number;
 	description: string;
 	stores: string[];
 }
@@ -27,10 +28,13 @@ export class TagService {
 		private alert: AlertService
 	) {
 		this.tags = mongo.get('tag', {
-			groups: 'parent',
-			query: {
-				rootTags: (tag: Tag) => !tag.parent
-			}
+			groups: {
+				parent: {
+					sort: mongo.sortAscNumber('order'),
+					field: (doc: Tag) => doc.parent
+				}
+			},
+			sort: mongo.sortAscNumber('order'),
 		}, (tags: Tag[], obj: Record<string, unknown>) => {
 			this.rootTags = obj['rootTags'] as Tag[];
 			this.childrenTags = obj['parent'] as Record<string, Tag[]>;

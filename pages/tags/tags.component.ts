@@ -106,7 +106,10 @@ export class TagsComponent {
 					if (this.parent) {
 						(created as Tag).parent = this.parent;
 					}
-					this._ts.create(created as Tag, this.setTags.bind(this));
+					this._ts.create(created as Tag, ()=>{
+						this.setTags();
+						this.sort();
+					});
 					close();
 				}
 			}, this.store ? { stores: [this.store]} : {});
@@ -137,8 +140,15 @@ export class TagsComponent {
 		},
 		buttons: [
 			{
-				icon: 'people',
+				icon: 'label_important',
 				hrefFunc: this.childrenUrl.bind(this)
+			},{
+				icon: 'arrow_upward',
+				click: (doc: Tag) => {
+					const index = this.tags.findIndex(d => d._id === doc._id);
+					[this.tags[index], this.tags[index - 1]] = [this.tags[index - 1], this.tags[index]];
+					this.sort();
+				}
 			}
 		],
 		headerButtons: [
@@ -158,6 +168,14 @@ export class TagsComponent {
 		]
 	};
 
+	sort() {
+		for (let i = 0; i < this.tags.length; i++) {
+			if (this.tags[i].order !== i) {
+				this.tags[i].order = i;
+				this._ts.save(this.tags[i], () => { }, '');
+			}
+		}
+	}
 	tags: Tag[] = [];
 	setTags() {
 		this.tags.splice(0, this.tags.length);
