@@ -16,8 +16,6 @@ export interface Tag {
 })
 export class TagService {
 	tags: Tag[] = [];
-	rootTags: Tag[] = [];
-	childrenTags: Record<string, Tag[]> = {};
 	_tags: Record<string, unknown> = {};
 	new(): Tag {
 		return {} as Tag;
@@ -28,16 +26,13 @@ export class TagService {
 		private alert: AlertService
 	) {
 		this.tags = mongo.get('tag', {
-			groups: {
-				parent: {
-					sort: mongo.sortAscNumber('order'),
-					field: (doc: Tag) => doc.parent
+			replace: {
+				order: (val: number, cb: (val: number)=>void)=>{
+					cb(val || 0);
 				}
 			},
 			sort: mongo.sortAscNumber('order'),
 		}, (tags: Tag[], obj: Record<string, unknown>) => {
-			this.rootTags = obj['rootTags'] as Tag[];
-			this.childrenTags = obj['parent'] as Record<string, Tag[]>;
 			this._tags = obj;
 		});
 	}
