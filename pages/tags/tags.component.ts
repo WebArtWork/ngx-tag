@@ -30,7 +30,7 @@ export class TagsComponent {
 		return urls.join('/');
 	}
 
-	columns = ['enabled', 'name', 'description'];
+	columns = ['enabled', 'name', 'url'];
 
 	form: FormInterface = this._form.getForm('tag', {
 		components: [
@@ -100,19 +100,23 @@ export class TagsComponent {
 
 	config = {
 		create: () => {
-			this._form.modal<Tag>(this.form, {
-				label: 'Create',
-				click: (created: unknown, close: () => void) => {
-					if (this.parent) {
-						(created as Tag).parent = this.parent;
+			this._form.modal<Tag>(
+				this.form,
+				{
+					label: 'Create',
+					click: (created: unknown, close: () => void) => {
+						if (this.parent) {
+							(created as Tag).parent = this.parent;
+						}
+						this._ts.create(created as Tag, () => {
+							this.setTags();
+							this.sort();
+						});
+						close();
 					}
-					this._ts.create(created as Tag, ()=>{
-						this.setTags();
-						this.sort();
-					});
-					close();
-				}
-			}, this.store ? { stores: [this.store]} : {});
+				},
+				this.store ? { stores: [this.store] } : {}
+			);
 		},
 		update: (doc: Tag) => {
 			this._form.modal<Tag>(this.form, [], doc).then((updated: Tag) => {
@@ -142,12 +146,22 @@ export class TagsComponent {
 			{
 				icon: 'label_important',
 				hrefFunc: this.childrenUrl.bind(this)
-			},{
+			},
+			{
 				icon: 'arrow_upward',
 				click: (doc: Tag) => {
-					const index = this.tags.findIndex(d => d._id === doc._id);
-					[this.tags[index], this.tags[index - 1]] = [this.tags[index - 1], this.tags[index]];
+					const index = this.tags.findIndex((d) => d._id === doc._id);
+					[this.tags[index], this.tags[index - 1]] = [
+						this.tags[index - 1],
+						this.tags[index]
+					];
 					this.sort();
+				}
+			},
+			{
+				icon: 'cloud_download',
+				click: (doc: Tag) => {
+					this._form.modalUnique<Tag>('tag', 'url', doc);
 				}
 			}
 		],
@@ -160,7 +174,7 @@ export class TagsComponent {
 								setTags: this.setTags.bind(this),
 								component: TagsCreateComponent,
 								parent: this.parent,
-								store: this.store,
+								store: this.store
 							});
 						}
 				  }
@@ -172,7 +186,7 @@ export class TagsComponent {
 		for (let i = 0; i < this.tags.length; i++) {
 			if (this.tags[i].order !== i) {
 				this.tags[i].order = i;
-				this._ts.save(this.tags[i], () => { }, '');
+				this._ts.save(this.tags[i], () => {}, '');
 			}
 		}
 	}
@@ -197,10 +211,7 @@ export class TagsComponent {
 					this.tags.push(tag);
 				}
 			} else {
-				if (
-					tag.stores.includes(this.store) &&
-					!tag.parent
-				) {
+				if (tag.stores.includes(this.store) && !tag.parent) {
 					this.tags.push(tag);
 				}
 			}
