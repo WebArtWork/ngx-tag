@@ -12,8 +12,8 @@ import {
 import { Tag, TagService } from '../../services/tag.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TagsCreateComponent } from './tags-create/tags-create.component';
-import { UserService } from 'src/app/core';
 import { Store, StoreService } from '../../../store/services/store.service';
+import { UserService } from 'src/app/modules/user/services/user.service';
 
 @Component({
 	templateUrl: './tags.component.html',

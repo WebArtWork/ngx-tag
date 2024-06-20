@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CoreModule } from 'src/app/core';
+import { CoreModule } from 'src/app/core/core.module';
 import { TagsComponent } from './tags.component';
 import { Routes, RouterModule } from '@angular/router';
 import { SelectModule } from 'src/app/modules/select/select.module';
